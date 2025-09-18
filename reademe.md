@@ -18,7 +18,7 @@ This project demonstrates the use of **Fully Homomorphic Encryption (FHE)** on a
 
 ### 1. Clone repo
 ```bash
-git clone https://github.com/<your-username>/fhevm-go-demo.git
+git clone https://github.com/thien0001/-fhevm-golang
 cd fhevm-go-demo
 
 
@@ -40,7 +40,7 @@ go mod tidy
 go run ./cmd/api
 
 The server will run at:
-👉 http://localhost:8080
+👉 http://localhost:3000
 
 🔌 API Endpoints
 POST /api/encrypt
@@ -87,7 +87,7 @@ Response:
 
 🛠️ Roadmap
 
-Frontend integration (React/Next.js UI)
+Frontend integration (test html)
 
 Private DeFi demo (add/subtract on encrypted data)
 
