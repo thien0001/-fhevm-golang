@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Zama Demo</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: linear-gradient(160deg, #000428, #004e92); color: white; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background: rgba(0,0,0,0.6); }
+     header img {
+    height: 50px;     
+    width: auto;       
+    border-radius: 8px; 
+  }
+    nav a { margin: 0 15px; color: white; text-decoration: none; font-weight: bold; }
+    .hero { text-align: center; padding: 80px 20px 40px; }
+    .hero h1 { font-size: 36px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 40px; max-width: 900px; margin: auto; }
+    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 30px; text-align: center; transition: all 0.3s; }
+    .card:hover { background: rgba(255,255,255,0.1); transform: translateY(-5px); }
+    .card span { font-size: 40px; display: block; margin-bottom: 15px; color: #FFD700; }
+    .cta { text-align: center; padding: 50px 20px 20px; font-size: 24px; font-weight: bold; }
+    .test-box { max-width: 600px; margin: 20px auto 80px; background: rgba(255,255,255,0.08); border-radius: 12px; padding: 30px; }
+    .test-box h2 { text-align: center; margin-bottom: 20px; }
+    .test-box textarea, .test-box input { width: 100%; padding: 10px; border-radius: 8px; border: none; font-size: 16px; margin-bottom: 10px; }
+    .test-box button { margin: 10px 10px 0 0; padding: 10px 20px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; background: #FFD700; color: black; }
+    .output { margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <img src="zama.jpg" alt="Zama Logo">
+    </div>
+    <nav>
+      <a href="#">Solutions</a>
+      <a href="#">Funding</a>
+      <a href="#">Demo</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Fully Homomorphic Encryption for Web3</h1>
+  </section>
+
+  <section class="grid">
+    <div class="card"><span>🛡️</span>Private DeFi</div>
+    <div class="card"><span>🔒</span>Private Voting</div>
+    <div class="card"><span>🧑‍💻</span>On-chain Identity</div>
+    <div class="card"><span>⚖️</span>Compliance</div>
+  </section>
+
+  <div class="cta">Join the privacy revolution</div>
+
+  <!-- Test Form -->
+  <div class="test-box">
+    <h2>🔐 Demo: Encrypt & Send</h2>
+    <textarea id="inputText" rows="4" placeholder="Enter your message..."></textarea>
+    <input id="toAddr" placeholder="Recipient address (0x...)" />
+    <br>
+    <button onclick="encryptData()">Encrypt</button>
+    <button onclick="sendData()">Send</button>
+    <button onclick="getResult()">Get Result</button>
+    <div class="output" id="outputBox">Result will appear here...</div>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:3000"; // đổi theo port Go Fiber của bạn
+    let cipherText = "";
+    let lastTx = "";
+
+    async function encryptData() {
+      const input = document.getElementById("inputText").value;
+      if (!input) return alert("Please enter text!");
+      try {
+        const res = await fetch(API_BASE + "/api/encrypt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data: input })
+        });
+        const json = await res.json();
+        cipherText = json.cipher;
+        document.getElementById("outputBox").innerText = "🔒 Encrypted:\n" + cipherText;
+      } catch (e) {
+        document.getElementById("outputBox").innerText = "Error: " + e;
+      }
+    }
+
+    async function sendData() {
+      if (!cipherText) return alert("Encrypt first!");
+      const to = document.getElementById("toAddr").value;
+      if (!to) return alert("Please enter recipient address");
+      try {
+        const res = await fetch(API_BASE + "/api/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cipher: cipherText, to: to })
+        });
+        const json = await res.json();
+        lastTx = json.txHash;
+        document.getElementById("outputBox").innerText =
+          "📤 Sent to: " + to + "\nCipher: " + cipherText + "\n\n📥 TxHash: " + lastTx;
+      } catch (e) {
+        document.getElementById("outputBox").innerText = "Error: " + e;
+      }
+    }
+
+    async function getResult() {
+      if (!lastTx) return alert("No txHash yet, send first!");
+      try {
+        const res = await fetch(API_BASE + "/api/result/" + lastTx);
+        const json = await res.json();
+        document.getElementById("outputBox").innerText =
+          "🔎 Result for Tx " + lastTx + ":\n" + JSON.stringify(json, null, 2);
+      } catch (e) {
+        document.getElementById("outputBox").innerText = "Error: " + e;
+      }
+    }
+  </script>
+</body>
+</html>
